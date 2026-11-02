@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MUNΛRQ — Biocultural &amp; Computational Architecture Studio</title>
+<meta content="Estudio de arquitectura que fusiona tectónica mineral, envolventes vegetales y diseño computacional." name="description"/>
+<!-- 4-TIER TYPOGRAPHY SYSTEM -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=Inter:wght@400;500&amp;family=Montserrat:wght@600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            "concrete": "#F5F5F5",
+            "pure": "#FFFFFF",
+            "onyx": "#1A1A1A",
+            "carbon": "#666666",
+            "moss": "#61752D",
+            "greige": "#B0BDAC",
+            "dark-canvas": "#121212", 
+            "dark-surface": "#1A1A1A",
+            "dark-border": "#333333"
+          },
+          fontFamily: {
+            serif: ["Cormorant", "serif"],
+            sans: ["Inter", "sans-serif"],
+            label: ["Montserrat", "sans-serif"],
+            mono: ["Space Mono", "monospace"]
+          }
+        }
+      }
+    };
+</script>
+<style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F5F5F5;
+      color: #1A1A1A;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark body {
+      background-color: #121212;
+      color: #F5F5F5;
+    }
+    /* Enforce strict 0px border radius globally */
+    * {
+      border-radius: 0px !important;
+    }
+    ::selection {
+      background-color: #61752D;
+      color: #FFFFFF;
+    }
+    /* Hide scrollbar for clean editorial look */
+    ::-webkit-scrollbar { width: 0px; background: transparent; }
+    
+    /* Technical range slider styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]:focus { outline: none; }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 1px;
+      cursor: pointer;
+      background: #1A1A1A;
+    }
+    .dark input[type=range]::-webkit-slider-runnable-track {
+      background: #F5F5F5;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      height: 16px;
+      width: 16px;
+      border: 1px solid #1A1A1A;
+      background: #F5F5F5;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -8px;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .dark input[type=range]::-webkit-slider-thumb {
+      border: 1px solid #F5F5F5;
+      background: #121212;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: #61752D;
+    }
+    
+    /* Elegant Underline Hover Effect for Nav */
+    .nav-link {
+      position: relative;
+      padding-bottom: 4px;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      transform: scaleX(0);
+      height: 1px;
+      bottom: 0;
+      left: 0;
+      background-color: #1A1A1A;
+      transform-origin: bottom right;
+      transition: transform 0.3s ease-out;
+    }
+    .dark .nav-link::after {
+      background-color: #F5F5F5;
+    }
+    .nav-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
+</style>
+</head>
+<body class="bg-concrete dark:bg-dark-canvas text-onyx dark:text-concrete min-h-screen relative transition-colors duration-300">
+<!-- NAVBAR -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-concrete/95 dark:bg-dark-canvas/95 backdrop-blur-sm border-b border-onyx/20 dark:border-white/20 transition-colors duration-300">
+<div class="max-w-[1600px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
+<!-- Logo -->
+<a class="flex items-center gap-4 group" href="#">
+<div class="w-8 h-8 bg-onyx text-pure dark:bg-pure dark:text-onyx flex items-center justify-center font-mono text-[10px] font-bold group-hover:bg-moss dark:group-hover:bg-moss dark:group-hover:text-pure transition-colors">
+            MΛ
+        </div>
+<span class="font-label text-xs font-bold tracking-[0.15em] uppercase">MUNΛRQ</span>
+</a>
+<!-- Interface Navigation -->
+<nav class="hidden lg:flex items-center gap-12 font-label text-[11px] font-bold tracking-[0.15em] uppercase text-onyx/70 dark:text-concrete/70">
+<a class="nav-link hover:text-onyx dark:hover:text-white transition-colors" href="#works">Selected Works</a>
+<a class="nav-link hover:text-onyx dark:hover:text-white transition-colors" href="#manifesto">Manifesto</a>
+<a class="nav-link hover:text-onyx dark:hover:text-white transition-colors" href="#lab">Research Lab</a>
+</nav>
+<div class="flex items-center gap-6">
+<!-- Theme Toggle -->
+<button class="font-mono text-[10px] font-bold tracking-widest uppercase hover:text-moss dark:hover:text-[#8ba83b] transition-colors cursor-pointer border border-onyx/20 dark:border-white/20 px-3 py-2" id="theme-toggle">
+            [ Dark Mode ]
+        </button>
+<!-- CTA -->
+<a class="hidden sm:inline-block font-label text-[11px] font-bold tracking-[0.15em] uppercase border border-onyx/20 dark:border-white/20 px-6 py-3 hover:border-onyx dark:hover:border-white hover:bg-pure dark:hover:bg-dark-surface transition-all" href="#contact">
+            Contact Studio
+        </a>
+</div>
+</div>
+</header>
+<!-- HERO -->
+<section class="relative h-[100svh] w-full flex items-end pb-24 px-6 md:px-12 border-b border-onyx/20 dark:border-white/20 overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="Brutalist Architecture" class="w-full h-full object-cover grayscale brightness-[0.4] dark:brightness-[0.3] transition-all duration-300" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="relative z-10 max-w-[1600px] mx-auto w-full">
+<div class="max-w-5xl">
+<span class="font-mono text-[11px] tracking-widest text-pure/70 uppercase block mb-8">
+                [ Architectural Monograph 2017—2025 ]
+            </span>
+<h1 class="text-5xl sm:text-7xl md:text-[6.5rem] lg:text-[7.5rem] font-serif font-light text-pure leading-[0.95] tracking-tighter">
+                Mineral Mass &amp; Living<br/>
+<span class="italic text-greige">Vegetative Envelopes</span><br/>
+                for the Tidal Century.
+            </h1>
+</div>
+</div>
+</section>
+<!-- SECTION 01: SELECTED WORKS -->
+<section class="w-full max-w-[1600px] mx-auto px-6 md:px-12 py-32" id="works">
+<div class="flex flex-col md:flex-row justify-between items-end border-b border-onyx/20 dark:border-white/20 pb-8 mb-16 gap-6 transition-colors duration-300">
+<h2 class="font-label text-xs font-bold tracking-[0.15em] uppercase text-carbon dark:text-concrete/60">
+            Section 01 // Selected Works
+        </h2>
+<p class="font-serif text-2xl md:text-3xl italic text-onyx dark:text-pure max-w-lg text-right leading-snug">
+            Interventions prioritizing raw geological matter and passive biocultural systems.
+        </p>
+</div>
+<a class="group block mb-24" href="#">
+<div class="w-full aspect-[21/9] overflow-hidden border border-onyx/20 dark:border-white/20 mb-6 bg-onyx">
+<img alt="Lichen Monolith" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-onyx/20 dark:border-white/20 pb-6">
+<div>
+<h3 class="text-4xl md:text-5xl font-serif font-medium text-onyx dark:text-pure group-hover:text-moss transition-colors">Lichen Monolith — Living Concrete</h3>
+<p class="font-sans text-sm text-carbon dark:text-concrete/60 mt-3 max-w-xl leading-relaxed">A permanent cultural gallery constructed with alkali-activated geopolymer concrete. Spontaneous colonization by Arctic-alpine lichens.</p>
+</div>
+<div class="font-mono text-[11px] text-carbon dark:text-concrete/60 text-left md:text-right uppercase tracking-wider space-y-1">
+<p>Oslo, Norway</p>
+<p>Completed 2023</p>
+<p class="text-moss dark:text-[#8ba83b] font-bold pt-2">Carbon Negative -18.4 kg/m²</p>
+</div>
+</div>
+</a>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+<a class="group block" href="#">
+<div class="w-full aspect-[4/5] overflow-hidden border border-onyx/20 dark:border-white/20 mb-6 bg-onyx">
+<img alt="Subterranean Timber Archive" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="border-b border-onyx/20 dark:border-white/20 pb-6">
+<h3 class="text-3xl font-serif font-medium text-onyx dark:text-pure group-hover:text-moss transition-colors">Subterranean Timber Archive</h3>
+<div class="flex justify-between items-end mt-6">
+<p class="font-mono text-[10px] text-carbon dark:text-concrete/60 uppercase tracking-wider leading-relaxed">Kyoto, Japan<br/>Completed 2024</p>
+<p class="font-mono text-[10px] text-moss dark:text-[#8ba83b] uppercase font-bold tracking-wider">Passive Earth Coupled</p>
+</div>
+</div>
+</a>
+<a class="group block" href="#">
+<div class="w-full aspect-[4/5] overflow-hidden border border-onyx/20 dark:border-white/20 mb-6 bg-onyx">
+<img alt="Parametric Vernacular Canopy" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="border-b border-onyx/20 dark:border-white/20 pb-6">
+<h3 class="text-3xl font-serif font-medium text-onyx dark:text-pure group-hover:text-moss transition-colors">Parametric Vernacular Canopy</h3>
+<div class="flex justify-between items-end mt-6">
+<p class="font-mono text-[10px] text-carbon dark:text-concrete/60 uppercase tracking-wider leading-relaxed">Oaxaca, Mexico<br/>Completed 2022</p>
+<p class="font-mono text-[10px] text-moss dark:text-[#8ba83b] uppercase font-bold tracking-wider">Robotic Joinery</p>
+</div>
+</div>
+</a>
+</div>
+</section>
+<!-- SECTION 02: THE BIOCULTURAL MANIFESTO -->
+<section class="w-full bg-greige/30 dark:bg-[#1A1D18] border-y border-onyx/20 dark:border-white/20 py-40 px-6 md:px-12 transition-colors duration-300" id="manifesto">
+<div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
+<div class="lg:col-span-4">
+<h2 class="font-label text-xs font-bold tracking-[0.15em] uppercase text-carbon dark:text-concrete/60 mb-8">
+                Section 02 // Philosophical Doctrine
+            </h2>
+<h3 class="font-serif text-5xl md:text-6xl font-light leading-[1.1] text-onyx dark:text-pure">
+                The Biocultural<br/><span class="italic text-moss dark:text-[#8ba83b]">Manifesto.</span>
+</h3>
+</div>
+<div class="lg:col-span-7 lg:col-start-6 space-y-12">
+<p class="font-serif text-3xl md:text-4xl leading-snug text-onyx dark:text-pure font-light">
+                "We reject synthetic cladding panels, cosmetic greenwashing, and arbitrary parametric spectacle. Architecture is an act of geological and ecological insertion."
+            </p>
+<div class="font-sans text-base text-carbon dark:text-concrete/70 space-y-6 max-w-2xl leading-relaxed">
+<p><strong class="text-onyx dark:text-pure font-medium">01. Substrate &amp; Geology.</strong> Buildings must reveal their structural skeleton without synthetic cosmetic masks. Mineral mass—low-clinker geopolymer concrete, quarried stone, and heavy structural timber—must be left exposed to sunlight, tidal mist, and seasonal weathering.</p>
+<p><strong class="text-onyx dark:text-pure font-medium">02. Symbiotic Computation.</strong> Algorithmic morphogenesis must not serve shallow formal acrobatics. Every computational curve is hard-coupled to environmental physics: daylight envelopes, convective buoyancy, and rainwater collection gradients.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 03: TECTONIC RESEARCH & LIVE CALCULATOR -->
+<section class="w-full max-w-[1600px] mx-auto px-6 md:px-12 py-32" id="lab">
+<div class="border border-onyx/20 dark:border-white/20 bg-pure dark:bg-dark-surface p-8 md:p-16 transition-colors duration-300">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-onyx/20 dark:border-white/20 pb-8 mb-12">
+<div>
+<h2 class="font-label text-xs font-bold tracking-[0.15em] uppercase text-carbon dark:text-concrete/60 mb-3">
+                    Section 03 // Research Lab
+                </h2>
+<h3 class="font-serif text-4xl md:text-5xl font-medium text-onyx dark:text-pure">
+                    Structural Pre-Dimensioner
+                </h3>
+</div>
+<p class="font-mono text-[11px] text-carbon dark:text-concrete/60 max-w-xs mt-6 md:mt-0 text-left md:text-right leading-relaxed uppercase tracking-wider">
+                Test beam depth, deflection, and carbon intensity compliant with Eurocode EN 1995-1-1.
+            </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+<!-- Controls -->
+<div class="space-y-12">
+<div>
+<div class="flex justify-between font-label text-xs font-bold mb-4 uppercase tracking-[0.15em]">
+<label for="span-slider">Structural Span</label>
+<span class="text-onyx dark:text-pure" id="span-val">12.0 m</span>
+</div>
+<input id="span-slider" max="28" min="4" step="1" type="range" value="12"/>
+</div>
+<div>
+<div class="flex justify-between font-label text-xs font-bold mb-4 uppercase tracking-[0.15em]">
+<label for="load-slider">Superimposed Load</label>
+<span class="text-onyx dark:text-pure" id="load-val">4.5 kN/m²</span>
+</div>
+<input id="load-slider" max="10.0" min="1.0" step="0.5" type="range" value="4.5"/>
+</div>
+<div>
+<label class="block font-label text-xs font-bold mb-4 uppercase tracking-[0.15em]">Material Substrate</label>
+<div class="grid grid-cols-3 gap-0 border border-onyx/20 dark:border-white/20" id="material-buttons">
+<button class="mat-select-btn py-4 border-r border-onyx/20 dark:border-white/20 font-label text-[10px] font-bold uppercase tracking-[0.15em] bg-onyx text-pure dark:bg-pure dark:text-onyx transition-all" data-material="geopolymer" type="button">Bio-Geo</button>
+<button class="mat-select-btn py-4 border-r border-onyx/20 dark:border-white/20 font-label text-[10px] font-bold uppercase tracking-[0.15em] bg-transparent text-onyx dark:text-pure hover:bg-concrete dark:hover:bg-dark-canvas transition-all" data-material="timber" type="button">Timber</button>
+<button class="mat-select-btn py-4 font-label text-[10px] font-bold uppercase tracking-[0.15em] bg-transparent text-onyx dark:text-pure hover:bg-concrete dark:hover:bg-dark-canvas transition-all" data-material="portland" type="button">Portland</button>
+</div>
+</div>
+</div>
+<!-- Results -->
+<div class="border border-onyx/20 dark:border-white/20 p-8 flex flex-col justify-between bg-concrete dark:bg-[#151515] transition-colors duration-300">
+<div>
+<div class="flex justify-between items-center border-b border-onyx/20 dark:border-white/20 pb-4 mb-8">
+<span class="font-label text-[10px] font-bold uppercase tracking-[0.15em] text-carbon dark:text-concrete/60">Output Metrics</span>
+<span class="font-mono text-[10px] uppercase tracking-wider text-moss dark:text-[#8ba83b] font-bold border border-moss/30 dark:border-[#8ba83b]/30 px-2 py-1 bg-moss/5 dark:bg-[#8ba83b]/5" id="compliance-badge">✓ Compliant</span>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div>
+<div class="font-label text-[10px] font-bold text-carbon dark:text-concrete/60 uppercase tracking-wider mb-2">Beam Depth</div>
+<div class="font-serif text-5xl font-light text-onyx dark:text-pure" id="output-depth">686 <span class="text-2xl">mm</span></div>
+</div>
+<div>
+<div class="font-label text-[10px] font-bold text-carbon dark:text-concrete/60 uppercase tracking-wider mb-2">Embodied CO2</div>
+<div class="font-serif text-5xl font-light text-moss dark:text-[#8ba83b]" id="output-co2">-32.4</div>
+<div class="font-mono text-[9px] text-carbon dark:text-concrete/60 uppercase tracking-widest mt-2">kg/m² negative</div>
+</div>
+</div>
+</div>
+<!-- SVG Diagram -->
+<div class="mt-16 pt-8 border-t border-onyx/20 dark:border-white/20">
+<div class="flex justify-between items-center mb-6 font-mono text-[10px] text-carbon dark:text-concrete/60 uppercase tracking-widest">
+<span>Deflection Profile</span>
+<span id="diagram-deflection">f_max: 18.2 mm (L/500)</span>
+</div>
+<svg class="w-full h-16 overflow-visible" id="structural-svg" viewbox="0 0 400 100">
+<line opacity="0.15" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" x1="20" x2="380" y1="50" y2="50"></line>
+<polygon fill="currentColor" points="15,85 25,85 20,75"></polygon>
+<polygon fill="currentColor" points="375,85 385,85 380,75"></polygon>
+<line opacity="0.3" stroke="currentColor" stroke-width="1" x1="10" x2="390" y1="85" y2="85"></line>
+<path d="M 20 50 Q 200 68 380 50" fill="none" id="deflection-curve" stroke="#61752D" stroke-width="2"></path>
+<circle cx="200" cy="68" fill="#61752D" id="deflection-pin" r="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FOOTER REDISEÑADO FIEL A LA IMAGEN DE REFERENCIA -->
+<footer class="bg-[#141414] text-white pt-24 pb-12 px-6 md:px-12 border-t border-onyx dark:border-dark-border transition-colors duration-300" id="contact">
+<div class="max-w-[1600px] mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-16 border-b border-white/20 pb-20 mb-8">
+<!-- Columna Izquierda: Brand & Descripción -->
+<div class="md:col-span-6 lg:col-span-5">
+<div class="flex items-center gap-4 mb-8">
+<!-- Logo tipográfico monumental Cormorant como en la referencia -->
+<span class="font-serif text-4xl tracking-widest uppercase">MUNARQ</span>
+</div>
+<p class="font-sans text-sm text-gray-400 leading-relaxed max-w-md">
+                    Eco-brutalism architecture and biophilic design.<br/>
+                    Regenerating urban-environmental interfaces through systemic concepts.
+                </p>
+</div>
+<!-- Columna Central: Values -->
+<div class="md:col-span-3 lg:col-span-3">
+<h4 class="font-label text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-8">Values</h4>
+<ul class="space-y-5 font-sans text-sm text-gray-300">
+<li class="hover:text-white transition-colors cursor-default">Eco-Brutalism</li>
+<li class="hover:text-white transition-colors cursor-default">Biophilic Design</li>
+<li class="hover:text-white transition-colors cursor-default">Layered Architecture</li>
+</ul>
+</div>
+<!-- Columna Derecha: Aesthetic -->
+<div class="md:col-span-3 lg:col-span-4">
+<h4 class="font-label text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-8">Aesthetic</h4>
+<ul class="space-y-5 font-sans text-sm text-gray-300">
+<li class="hover:text-white transition-colors cursor-default">Organic Futurism</li>
+<li class="hover:text-white transition-colors cursor-default">Textured Deconstruction</li>
+<li class="hover:text-white transition-colors cursor-default">Raw Tactility</li>
+</ul>
+</div>
+</div>
+<!-- Bottom Bar -->
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-[10px] text-gray-500 uppercase tracking-widest">
+<p>© MUNARQ. All rights reserved.</p>
+<p class="text-gray-400">MISSION DRIVEN ARCHITECTURE</p>
+</div>
+</div>
+</footer>
+<!-- JAVASCRIPT (Theme Logic & Calculator) -->
+<script>
+    // 1. Theme Toggle Logic con persistencia en localStorage
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        html.classList.add('dark');
+        themeToggleBtn.textContent = '[ Light Mode ]';
+    } else {
+        html.classList.remove('dark');
+        themeToggleBtn.textContent = '[ Dark Mode ]';
+    }
+    themeToggleBtn.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        if (html.classList.contains('dark')) {
+            localStorage.theme = 'dark';
+            themeToggleBtn.textContent = '[ Light Mode ]';
+            updateSVGColors(true);
+        } else {
+            localStorage.theme = 'light';
+            themeToggleBtn.textContent = '[ Dark Mode ]';
+            updateSVGColors(false);
+        }
+    });
+    function updateSVGColors(isDark) {
+        const svgElements = document.querySelectorAll('#structural-svg polygon, #structural-svg line');
+        const strokeColor = isDark ? '#F5F5F5' : '#1A1A1A';
+        svgElements.forEach(el => {
+            if (el.tagName === 'polygon') el.setAttribute('fill', strokeColor);
+            if (el.tagName === 'line') el.setAttribute('stroke', strokeColor);
+        });
+    }
+
+    // 2. Calculator Logic
+    const spanSlider = document.getElementById('span-slider');
+    const loadSlider = document.getElementById('load-slider');
+    const spanVal = document.getElementById('span-val');
+    const loadVal = document.getElementById('load-val');
+    const outputDepth = document.getElementById('output-depth');
+    const outputCO2 = document.getElementById('output-co2');
+    const diagramDeflection = document.getElementById('diagram-deflection');
+    const deflectionCurve = document.getElementById('deflection-curve');
+    const deflectionPin = document.getElementById('deflection-pin');
+    const complianceBadge = document.getElementById('compliance-badge');
+    const matButtons = document.querySelectorAll('.mat-select-btn');
+    let currentMaterial = 'geopolymer';
+    matButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            matButtons.forEach(b => {
+                b.classList.remove('bg-onyx', 'text-pure', 'dark:bg-pure', 'dark:text-onyx');
+                b.classList.add('bg-transparent', 'text-onyx', 'dark:text-pure');
+            });
+            btn.classList.add('bg-onyx', 'text-pure', 'dark:bg-pure', 'dark:text-onyx');
+            btn.classList.remove('bg-transparent', 'text-onyx', 'dark:text-pure');
+            
+            currentMaterial = btn.getAttribute('data-material');
+            recalculate();
+        });
+    });
+    function recalculate() {
+        const span = parseFloat(spanSlider.value);
+        const load = parseFloat(loadSlider.value);
+        spanVal.textContent = span.toFixed(1) + ' m';
+        loadVal.textContent = load.toFixed(1) + ' kN/m²';
+        let ratio = 17.5;
+        let co2Base = -2.7;
+        let elasticMod = 1.0;
+        if (currentMaterial === 'timber') {
+            ratio = 14.0;
+            co2Base = -5.8;
+            elasticMod = 0.85;
+        } else if (currentMaterial === 'portland') {
+            ratio = 20.0;
+            co2Base = 18.5;
+            elasticMod = 1.35;
+        }
+        const calculatedDepth = Math.round((span / ratio) * 1000);
+        outputDepth.innerHTML = calculatedDepth + ' <span class="text-2xl">mm</span>';
+        const netCO2 = (span * co2Base * (load / 4.0)).toFixed(1);
+        if (netCO2 < 0) {
+            outputCO2.textContent = netCO2;
+            outputCO2.className = 'font-serif text-5xl font-light text-moss dark:text-[#8ba83b]';
+        } else {
+            outputCO2.textContent = '+' + netCO2;
+            outputCO2.className = 'font-serif text-5xl font-light text-[#ba1a1a]'; 
+        }
+        const deflectionMM = ((Math.pow(span, 3) * load * 0.019) / elasticMod).toFixed(1);
+        const limitL500 = ((span * 1000) / 500).toFixed(1);
+        if (parseFloat(deflectionMM) <= parseFloat(limitL500)) {
+            diagramDeflection.textContent = `f_max: ${deflectionMM} mm (L/500)`;
+            complianceBadge.textContent = `✓ Compliant`;
+            complianceBadge.className = 'font-mono text-[10px] uppercase tracking-wider text-moss dark:text-[#8ba83b] font-bold border border-moss/30 dark:border-[#8ba83b]/30 px-2 py-1 bg-moss/5 dark:bg-[#8ba83b]/5';
+            deflectionCurve.setAttribute('stroke', '#61752D');
+            deflectionPin.setAttribute('fill', '#61752D');
+        } else {
+            diagramDeflection.textContent = `f_max: ${deflectionMM} mm (Excessive)`;
+            complianceBadge.textContent = `⚠ Expansion Req.`;
+            complianceBadge.className = 'font-mono text-[10px] uppercase tracking-wider text-[#ba1a1a] font-bold border border-[#ba1a1a]/30 px-2 py-1 bg-[#ba1a1a]/5';
+            deflectionCurve.setAttribute('stroke', '#ba1a1a');
+            deflectionPin.setAttribute('fill', '#ba1a1a');
+        }
+        const baselineY = 50;
+        const maxSag = Math.min(85, baselineY + (deflectionMM * 1.6));
+        deflectionCurve.setAttribute('d', `M 20 ${baselineY} Q 200 ${maxSag} 380 ${baselineY}`);
+        deflectionPin.setAttribute('cy', maxSag);
+    }
+    spanSlider.addEventListener('input', recalculate);
+    loadSlider.addEventListener('input', recalculate);
+    updateSVGColors(html.classList.contains('dark'));
+</script>
+</body>
+</html>

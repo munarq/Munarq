@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Palette */
+  --color-concrete: #F5F5F5;
+  --color-pure: #FFFFFF;
+  --color-onyx: #1A1A1A;
+  --color-carbon: #666666;
+  --color-dark-canvas: #121212;
+  --color-dark-surface: #1A1A1A;
+  --color-moss: #61752D;
+  --color-moss-bright: #8ba83b;
+  --color-greige: #E8E6DF;
+
+  /* Typography */
+  --font-serif: "Cormorant", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Montserrat", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  /* Force square corners */
+  --radius-*: initial;
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-concrete);
+    color: var(--color-onyx);
+    transition: background-color .3s ease, color .3s ease;
+  }
+  .dark body {
+    background: var(--color-dark-canvas);
+    color: var(--color-concrete);
+  }
+
+  /* Kill shadows everywhere (depth = 1px lines) */
+  *, *::before, *::after { box-shadow: none !important; }
+
+  /* Kill radius on UI atoms, but leave SVG untouched */
+  div, section, article, header, footer, nav, aside,
+  button, input, textarea, select, form, a, figure {
+    border-radius: 0 !important;
+  }
+
+  /* Grayscale → color on hover, with soft zoom */
+  img {
+    display: block;
+    filter: grayscale(1);
+    transition: filter .6s ease, transform .6s ease;
+  }
+  .group:hover img, a:hover > img, figure:hover img {
+    filter: grayscale(0);
+    transform: scale(1.05);
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+  .tracking-editorial { letter-spacing: 0.28em; }
+}

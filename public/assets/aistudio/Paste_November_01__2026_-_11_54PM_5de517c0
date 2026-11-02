@@ -1,0 +1,1062 @@
+Perfecto — interpreto que al devolverme el análisis lo das por bueno. Procedo con la **opción 1: cerrar la migración**, y de paso resuelvo los dos conflictos que dejé abiertos:
+
+- **Paleta:** gana el brand book. `metadata.json` se corrige (fuera Nord/Solarized).
+- **Narrativa:** `"oceanic / litoral"` era descriptor de un proyecto, **no** un pivote. El posicionamiento se mantiene: *Eco-Brutalist + Biophilic*. Lo reescribo en `metadata.json`.
+
+A continuación te dejo **el scaffold completo, funcional y end-to-end** (dev + build + API Gemini con fallback determinista). Dieciséis archivos.
+
+---
+
+## 1. `src/index.css` — Brand book blindado
+
+```css
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Palette */
+  --color-concrete: #F5F5F5;
+  --color-pure: #FFFFFF;
+  --color-onyx: #1A1A1A;
+  --color-carbon: #666666;
+  --color-dark-canvas: #121212;
+  --color-dark-surface: #1A1A1A;
+  --color-moss: #61752D;
+  --color-moss-bright: #8ba83b;
+  --color-greige: #E8E6DF;
+
+  /* Typography */
+  --font-serif: "Cormorant", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Montserrat", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+
+  /* Force square corners */
+  --radius-*: initial;
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-concrete);
+    color: var(--color-onyx);
+    transition: background-color .3s ease, color .3s ease;
+  }
+  .dark body {
+    background: var(--color-dark-canvas);
+    color: var(--color-concrete);
+  }
+
+  /* Kill shadows everywhere (depth = 1px lines) */
+  *, *::before, *::after { box-shadow: none !important; }
+
+  /* Kill radius on UI atoms, but leave SVG untouched */
+  div, section, article, header, footer, nav, aside,
+  button, input, textarea, select, form, a, figure {
+    border-radius: 0 !important;
+  }
+
+  /* Grayscale → color on hover, with soft zoom */
+  img {
+    display: block;
+    filter: grayscale(1);
+    transition: filter .6s ease, transform .6s ease;
+  }
+  .group:hover img, a:hover > img, figure:hover img {
+    filter: grayscale(0);
+    transform: scale(1.05);
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+  .tracking-editorial { letter-spacing: 0.28em; }
+}
+```
+
+---
+
+## 2. `src/main.tsx`
+
+```tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+---
+
+## 3. `src/lib/useTheme.ts`
+
+```ts
+import { useCallback, useEffect, useState } from "react";
+
+export type Theme = "light" | "dark";
+
+function getInitial(): Theme {
+  if (typeof window === "undefined") return "light";
+  const stored = localStorage.getItem("munarq-theme");
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+export function useTheme() {
+  const [theme, setTheme] = useState<Theme>(getInitial);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("munarq-theme", theme);
+  }, [theme]);
+
+  const toggle = useCallback(
+    () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+    []
+  );
+
+  return { theme, toggle };
+}
+```
+
+---
+
+## 4. `src/lib/api.ts`
+
+```ts
+export type AnalyzePayload = {
+  span: number;
+  load: number;
+  material: string;
+  co2: number;
+  deltaMm: number;
+};
+
+export type AnalyzeResponse = {
+  text: string;
+  source: "gemini" | "fallback";
+};
+
+export async function analyzeStructure(
+  payload: AnalyzePayload
+): Promise<AnalyzeResponse> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return (await res.json()) as AnalyzeResponse;
+}
+```
+
+---
+
+## 5. `src/lib/projects.ts`
+
+```ts
+export type Project = {
+  slug: string;
+  index: string;
+  title: string;
+  location: string;
+  year: string;
+  type: string;
+  area: string;
+  coords: string;
+  image: string;
+  size: "wide" | "half";
+};
+
+export const projects: Project[] = [
+  {
+    slug: "casa-estrato",
+    index: "01",
+    title: "Casa Estrato",
+    location: "Valle de Bravo, MX",
+    year: "2024",
+    type: "Vivienda unifamiliar",
+    area: "420 m²",
+    coords: "19.2047° N · 100.1319° W",
+    image:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=2000&q=80&auto=format&fit=crop",
+    size: "wide",
+  },
+  {
+    slug: "pabellon-mineral",
+    index: "02",
+    title: "Pabellón Mineral",
+    location: "Oaxaca, MX",
+    year: "2023",
+    type: "Pabellón cultural",
+    area: "180 m²",
+    coords: "17.0732° N · 96.7266° W",
+    image:
+      "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=1600&q=80&auto=format&fit=crop",
+    size: "half",
+  },
+  {
+    slug: "invernadero-urbano",
+    index: "03",
+    title: "Invernadero Urbano",
+    location: "CDMX, MX",
+    year: "2023",
+    type: "Equipamiento",
+    area: "1,200 m²",
+    coords: "19.4326° N · 99.1332° W",
+    image:
+      "https://images.unsplash.com/photo-1470723710355-95304d8aece4?w=1600&q=80&auto=format&fit=crop",
+    size: "half",
+  },
+];
+```
+
+---
+
+## 6. `src/components/Reveal.tsx`
+
+```tsx
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
+export function Reveal({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-all duration-700 ease-out ${
+        shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+---
+
+## 7. `src/components/Navbar.tsx`
+
+```tsx
+import { useEffect, useState } from "react";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import type { Theme } from "@/lib/useTheme";
+
+const LINKS = [
+  { href: "#works",     label: "Works"     },
+  { href: "#manifesto", label: "Manifesto" },
+  { href: "#lab",       label: "Research"  },
+  { href: "#contact",   label: "Contact"   },
+];
+
+export function Navbar({
+  theme,
+  onToggleTheme,
+}: {
+  theme: Theme;
+  onToggleTheme: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
+        scrolled
+          ? "bg-concrete/85 dark:bg-dark-canvas/85 backdrop-blur-md border-b border-onyx/10 dark:border-concrete/10"
+          : "bg-transparent border-b border-transparent"
+      }`}
+    >
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 h-16 flex items-center justify-between">
+        <a
+          href="#top"
+          className="font-display font-bold text-sm tracking-editorial uppercase text-onyx dark:text-concrete"
+        >
+          MUNΛRQ
+        </a>
+
+        <nav className="hidden md:flex items-center gap-10">
+          {LINKS.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="font-display text-[11px] tracking-editorial uppercase text-onyx/70 hover:text-moss dark:text-concrete/70 dark:hover:text-moss-bright transition-colors"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggleTheme}
+            aria-label="Toggle theme"
+            className="p-2 text-onyx/70 hover:text-moss dark:text-concrete/70 dark:hover:text-moss-bright transition-colors"
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Menu"
+            className="md:hidden p-2 text-onyx dark:text-concrete"
+          >
+            {open ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div className="md:hidden border-t border-onyx/10 dark:border-concrete/10 bg-concrete dark:bg-dark-canvas">
+          <nav className="px-6 py-6 flex flex-col gap-5">
+            {LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="font-display text-xs tracking-editorial uppercase text-onyx dark:text-concrete"
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+}
+```
+
+---
+
+## 8. `src/components/Hero.tsx`
+
+```tsx
+export function Hero() {
+  return (
+    <section
+      id="top"
+      className="relative min-h-screen flex items-end overflow-hidden bg-onyx"
+    >
+      <img
+        src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=2400&q=80&auto=format&fit=crop"
+        alt=""
+        aria-hidden
+        className="absolute inset-0 w-full h-full object-cover opacity-55"
+        style={{ filter: "grayscale(1)" }}
+      />
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-12 pb-16 md:pb-24">
+        <p className="font-mono text-[10px] tracking-editorial uppercase text-concrete/60 mb-8">
+          01 — MUNΛRQ · Biocultural & Computational Architecture
+        </p>
+        <h1 className="font-serif font-light text-concrete leading-[0.88] text-[clamp(2.75rem,9.5vw,10rem)] text-balance">
+          Mineral <span className="italic text-moss-bright">tectonics</span>,
+          <br />
+          vegetal envelopes.
+        </h1>
+        <div className="mt-14 grid md:grid-cols-12 gap-8 border-t border-concrete/20 pt-8">
+          <p className="md:col-span-6 md:col-start-7 font-sans text-concrete/80 text-sm leading-relaxed max-w-prose">
+            Estudio de arquitectura que fusiona hormigón visto, estratos
+            vegetales y diseño computacional. Operamos entre la materia y el
+            algoritmo, entre el plano y el clima.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+---
+
+## 9. `src/components/SelectedWorks.tsx`
+
+```tsx
+import { projects } from "@/lib/projects";
+import { Reveal } from "./Reveal";
+
+export function SelectedWorks() {
+  return (
+    <section
+      id="works"
+      className="max-w-[1600px] mx-auto px-6 md:px-12 py-24 md:py-40"
+    >
+      <header className="flex items-end justify-between border-b border-onyx/20 dark:border-concrete/20 pb-6 mb-16">
+        <h2 className="font-serif italic font-light text-5xl md:text-7xl text-onyx dark:text-concrete">
+          Selected works
+        </h2>
+        <span className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
+          2022 — 2025
+        </span>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
+        {projects.map((p, i) => (
+          <Reveal
+            key={p.slug}
+            delay={i * 80}
+            className={p.size === "wide" ? "md:col-span-12" : "md:col-span-6"}
+          >
+            <a href={`#project-${p.slug}`} className="group block">
+              <div
+                className={`relative overflow-hidden bg-onyx ${
+                  p.size === "wide" ? "aspect-[21/9]" : "aspect-[4/5]"
+                }`}
+              >
+                <img
+                  src={p.image}
+                  alt={p.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+              <div className="mt-5 flex items-start justify-between gap-6 border-t border-onyx/20 dark:border-concrete/20 pt-4">
+                <div>
+                  <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
+                    {p.index} — {p.type}
+                  </p>
+                  <h3 className="font-serif text-3xl md:text-4xl font-light mt-2 text-onyx dark:text-concrete group-hover:text-moss dark:group-hover:text-moss-bright transition-colors">
+                    {p.title}
+                  </h3>
+                </div>
+                <div className="text-right font-mono text-[10px] uppercase tracking-[0.18em] text-carbon dark:text-concrete/60 space-y-1 whitespace-nowrap">
+                  <p>{p.location}</p>
+                  <p>{p.year}</p>
+                  <p>{p.area}</p>
+                  <p className="text-moss dark:text-moss-bright">{p.coords}</p>
+                </div>
+              </div>
+            </a>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+```
+
+---
+
+## 10. `src/components/Manifesto.tsx`
+
+```tsx
+import { Reveal } from "./Reveal";
+
+export function Manifesto() {
+  return (
+    <section
+      id="manifesto"
+      className="bg-greige dark:bg-dark-surface border-y border-onyx/10 dark:border-concrete/10"
+    >
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-24 md:py-40 grid md:grid-cols-12 gap-10">
+        <div className="md:col-span-3">
+          <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
+            02 — Manifesto
+          </p>
+        </div>
+        <Reveal className="md:col-span-8 md:col-start-5">
+          <p className="font-serif font-light text-3xl md:text-5xl leading-[1.15] text-onyx dark:text-concrete text-balance">
+            Construimos <span className="italic text-moss dark:text-moss-bright">con</span> la
+            materia, no <span className="italic">contra</span> ella. El hormigón
+            es nuestro sustrato; la vegetación, su sintaxis. Cada proyecto se
+            negocia con el clima, con el carbono embebido y con la vida que ha
+            de habitarlo.
+          </p>
+          <p className="mt-10 font-sans text-base leading-relaxed text-carbon dark:text-concrete/70 max-w-prose">
+            No perseguimos la forma por la forma. Perseguimos el comportamiento:
+            cómo se asienta un muro sobre el terreno, cómo respira una fachada,
+            cómo envejece un material. La belleza —cuando aparece— es el
+            subproducto de una decisión técnica bien tomada.
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+```
+
+---
+
+## 11. `src/components/ResearchLab.tsx`
+
+```tsx
+import { useMemo, useState } from "react";
+import { analyzeStructure } from "@/lib/api";
+import { Reveal } from "./Reveal";
+
+const MATERIALS = {
+  concrete: { label: "Hormigón visto", co2: 410, E: 30e9 },
+  steel:    { label: "Acero S355",     co2: 1850, E: 210e9 },
+  timber:   { label: "Madera CLT",     co2: 120, E: 12e9 },
+  stone:    { label: "Piedra local",   co2: 90,  E: 25e9 },
+} as const;
+
+type MaterialKey = keyof typeof MATERIALS;
+
+export function ResearchLab() {
+  const [span, setSpan] = useState(8);
+  const [load, setLoad] = useState(5);
+  const [material, setMaterial] = useState<MaterialKey>("concrete");
+  const [analysis, setAnalysis] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [source, setSource] = useState<"gemini" | "fallback" | "">("");
+
+  const calc = useMemo(() => {
+    const { E, co2: co2PerM3 } = MATERIALS[material];
+    const b = 0.3;
+    const h = span / 18;
+    const A = b * h;
+    const I = (b * h ** 3) / 12;
+    const q = load * 1000; // N/m (1m strip)
+    const L = span;
+    const delta = (5 * q * L ** 4) / (384 * E * I);
+    const deltaMm = delta * 1000;
+    const volume = A * L;
+    const co2 = volume * co2PerM3;
+    return { h, deltaMm, co2 };
+  }, [span, load, material]);
+
+  const norm = Math.min(calc.deltaMm / 30, 1);
+  const sag = 6 + norm * 70;
+  const W = 400, H = 120;
+  const path = `M 0 20 Q ${W / 2} ${20 + sag * 2}, ${W} 20`;
+
+  async function handleAnalyze() {
+    setLoading(true);
+    setAnalysis("");
+    try {
+      const res = await analyzeStructure({
+        span,
+        load,
+        material: MATERIALS[material].label,
+        co2: calc.co2,
+        deltaMm: calc.deltaMm,
+      });
+      setAnalysis(res.text);
+      setSource(res.source);
+    } catch (err) {
+      setAnalysis("No se pudo contactar con el motor de análisis.");
+      setSource("fallback");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section
+      id="lab"
+      className="max-w-[1600px] mx-auto px-6 md:px-12 py-24 md:py-40"
+    >
+      <header className="flex items-end justify-between border-b border-onyx/20 dark:border-concrete/20 pb-6 mb-12">
+        <h2 className="font-serif italic font-light text-5xl md:text-7xl text-onyx dark:text-concrete">
+          Research Lab
+        </h2>
+        <span className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
+          Structural calculator v0.1
+        </span>
+      </header>
+
+      <div className="grid md:grid-cols-12 gap-10 md:gap-16">
+        {/* Controls */}
+        <Reveal className="md:col-span-5">
+          <div className="space-y-10">
+            <Slider
+              label="Luz · span"
+              value={span}
+              min={4}
+              max={16}
+              step={0.5}
+              unit="m"
+              onChange={setSpan}
+            />
+            <Slider
+              label="Carga · live load"
+              value={load}
+              min={2}
+              max={20}
+              step={0.5}
+              unit="kN/m²"
+              onChange={setLoad}
+            />
+
+            <div>
+              <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60 mb-3">
+                Material
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.keys(MATERIALS) as MaterialKey[]).map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => setMaterial(k)}
+                    className={`px-3 py-3 font-display text-[10px] tracking-editorial uppercase border transition-colors text-left ${
+                      material === k
+                        ? "bg-onyx text-concrete border-onyx dark:bg-moss dark:border-moss"
+                        : "border-onyx/20 dark:border-concrete/20 text-onyx dark:text-concrete hover:border-moss dark:hover:border-moss-bright"
+                    }`}
+                  >
+                    {MATERIALS[k].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Visualization + outputs */}
+        <Reveal className="md:col-span-6 md:col-start-7" delay={120}>
+          <div className="border border-onyx/20 dark:border-concrete/20 p-6 md:p-8 bg-pure dark:bg-dark-surface">
+            <div className="flex justify-between font-mono text-[10px] tracking-[0.18em] uppercase text-carbon dark:text-concrete/60 mb-4">
+              <span>Deflection curve</span>
+              <span className="text-moss dark:text-moss-bright">
+                L = {span.toFixed(1)} m
+              </span>
+            </div>
+
+            <svg
+              viewBox={`0 0 ${W} ${H}`}
+              className="w-full h-auto"
+              aria-hidden
+            >
+              <line
+                x1={0} y1={20} x2={W} y2={20}
+                stroke="currentColor" strokeOpacity={0.15}
+                className="text-onyx dark:text-concrete"
+              />
+              <path
+                d={path}
+                fill="none"
+                strokeWidth={2}
+                className="text-moss dark:text-moss-bright"
+                stroke="currentColor"
+              />
+              <circle cx={0} cy={20} r={3} fill="currentColor" className="text-onyx dark:text-concrete" />
+              <circle cx={W} cy={20} r={3} fill="currentColor" className="text-onyx dark:text-concrete" />
+            </svg>
+
+            <div className="mt-6 grid grid-cols-3 gap-4 border-t border-onyx/20 dark:border-concrete/20 pt-5">
+              <Stat label="Deflection" value={`${calc.deltaMm.toFixed(1)} mm`} />
+              <Stat label="Section h" value={`${(calc.h * 100).toFixed(0)} cm`} />
+              <Stat label="CO₂ emb." value={`${calc.co2.toFixed(0)} kg`} />
+            </div>
+
+            <button
+              onClick={handleAnalyze}
+              disabled={loading}
+              className="mt-6 w-full py-4 font-display text-[10px] tracking-editorial uppercase bg-onyx text-concrete dark:bg-moss dark:text-concrete hover:bg-moss dark:hover:bg-moss-bright transition-colors disabled:opacity-50"
+            >
+              {loading ? "Analizando…" : "Analizar con Gemini"}
+            </button>
+
+            {analysis && (
+              <div className="mt-6 border-t border-onyx/20 dark:border-concrete/20 pt-5">
+                <p className="font-mono text-[9px] tracking-editorial uppercase text-carbon dark:text-concrete/50 mb-2">
+                  {source === "gemini" ? "Gemini · análisis" : "Fallback · análisis local"}
+                </p>
+                <p className="font-sans text-sm leading-relaxed text-onyx dark:text-concrete/80">
+                  {analysis}
+                </p>
+              </div>
+            )}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Slider({
+  label, value, min, max, step, unit, onChange,
+}: {
+  label: string; value: number; min: number; max: number;
+  step: number; unit: string; onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-3">
+        <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
+          {label}
+        </p>
+        <p className="font-mono text-sm text-onyx dark:text-concrete">
+          {value.toFixed(1)} <span className="text-[10px] text-carbon dark:text-concrete/50">{unit}</span>
+        </p>
+      </div>
+      <input
+        type="range"
+        min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-moss dark:accent-moss-bright"
+      />
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="font-mono text-[9px] tracking-editorial uppercase text-carbon dark:text-concrete/50">
+        {label}
+      </p>
+      <p className="font-serif text-2xl mt-1 text-onyx dark:text-concrete">
+        {value}
+      </p>
+    </div>
+  );
+}
+```
+
+---
+
+## 12. `src/components/Footer.tsx`
+
+```tsx
+export function Footer() {
+  return (
+    <footer
+      id="contact"
+      className="border-t border-onyx/20 dark:border-concrete/20 bg-concrete dark:bg-dark-canvas"
+    >
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-20 md:py-28 grid md:grid-cols-12 gap-10">
+        <div className="md:col-span-5">
+          <p className="font-display font-bold text-sm tracking-editorial uppercase text-onyx dark:text-concrete">
+            MUNΛRQ
+          </p>
+          <p className="mt-6 font-serif italic font-light text-3xl md:text-4xl leading-tight text-onyx dark:text-concrete max-w-sm">
+            Architecture that negotiates with the climate.
+          </p>
+          <a
+            href="mailto:studio@munarq.mx"
+            className="mt-10 inline-block font-mono text-xs tracking-[0.2em] uppercase text-moss dark:text-moss-bright hover:underline underline-offset-4"
+          >
+            studio@munarq.mx →
+          </a>
+        </div>
+
+        <div className="md:col-span-3">
+          <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60 mb-4">
+            Values
+          </p>
+          <ul className="space-y-2 font-sans text-sm text-onyx dark:text-concrete/80">
+            <li>Eco-Brutalism</li>
+            <li>Biophilic Design</li>
+            <li>Embodied Carbon</li>
+            <li>Computational Tectonics</li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-4">
+          <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60 mb-4">
+            Aesthetic
+          </p>
+          <p className="font-sans text-sm leading-relaxed text-carbon dark:text-concrete/70 max-w-xs">
+            Concrete White · Onyx Black · Moss Green. Cormorant, Montserrat,
+            Inter, Space Mono. Square corners. No shadows. One-pixel lines.
+          </p>
+          <p className="mt-8 font-mono text-[10px] tracking-[0.2em] uppercase text-carbon dark:text-concrete/40">
+            © {new Date().getFullYear()} MUNΛRQ · All rights reserved
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+```
+
+---
+
+## 13. `src/App.tsx`
+
+```tsx
+import { Navbar } from "./components/Navbar";
+import { Hero } from "./components/Hero";
+import { SelectedWorks } from "./components/SelectedWorks";
+import { Manifesto } from "./components/Manifesto";
+import { ResearchLab } from "./components/ResearchLab";
+import { Footer } from "./components/Footer";
+import { useTheme } from "./lib/useTheme";
+
+export default function App() {
+  const { theme, toggle } = useTheme();
+
+  return (
+    <>
+      <Navbar theme={theme} onToggleTheme={toggle} />
+      <main>
+        <Hero />
+        <SelectedWorks />
+        <Manifesto />
+        <ResearchLab />
+      </main>
+      <Footer />
+    </>
+  );
+}
+```
+
+---
+
+## 14. `server.ts`
+
+```ts
+import express from "express";
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PORT = Number(process.env.PORT ?? 3001);
+const app = express();
+app.use(express.json({ limit: "256kb" }));
+
+app.get("/api/health", (_req, res) => {
+  res.json({
+    ok: true,
+    gemini: Boolean(process.env.GEMINI_API_KEY),
+    ts: new Date().toISOString(),
+  });
+});
+
+app.post("/api/analyze", async (req, res) => {
+  const { span, load, material, co2, deltaMm } = req.body ?? {};
+  if (
+    typeof span !== "number" ||
+    typeof load !== "number" ||
+    typeof material !== "string"
+  ) {
+    res.status(400).json({ error: "invalid_payload" });
+    return;
+  }
+
+  const fallback = [
+    `Análisis determinista — Luz ${Number(span).toFixed(1)} m,`,
+    `carga ${Number(load).toFixed(1)} kN/m², material ${material}.`,
+    `Deflexión ${Number(deltaMm ?? 0).toFixed(1)} mm,`,
+    `CO₂ embebido ${Number(co2 ?? 0).toFixed(0)} kg por metro de ancho.`,
+    `Recomendación: ajustar sección antes de fijar el material.`,
+  ].join(" ");
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    res.json({ text: fallback, source: "fallback" });
+    return;
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    const prompt = [
+      "Eres el motor de análisis del Research Lab de MUNΛRQ,",
+      "un despacho de arquitectura eco-brutalista y biophilic.",
+      "Devuelve UN párrafo editorial en español, 60–80 palabras,",
+      "tono seco y preciso, sin emojis, sin listas, sin Markdown.",
+      "Analiza esta viga simplemente apoyada desde lo estructural,",
+      "lo bioclimático y el carbono embebido.",
+      `Datos: luz ${span} m, carga ${load} kN/m², material ${material},`,
+      `deflexión ${deltaMm} mm, CO₂ embebido ${co2} kg por metro de ancho.`,
+      "Cierra con UNA recomendación material o de sección.",
+    ].join(" ");
+
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    const text = result.text ?? fallback;
+    res.json({ text, source: "gemini" });
+  } catch (err) {
+    console.error("[analyze] gemini error", err);
+    res.json({ text: fallback, source: "fallback" });
+  }
+});
+
+if (process.env.NODE_ENV === "production") {
+  const dist = path.join(process.cwd(), "dist");
+  app.use(express.static(dist));
+  app.get("*", (_req, res) => res.sendFile(path.join(dist, "index.html")));
+}
+
+app.listen(PORT, () => {
+  console.log(`[MUNΛRQ] api on :${PORT} (gemini=${Boolean(process.env.GEMINI_API_KEY)})`);
+});
+```
+
+---
+
+## 15. `vite.config.ts` (actualizado con proxy)
+
+```ts
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import path from "node:path";
+import { defineConfig } from "vite";
+
+export default defineConfig(() => ({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: { "@": path.resolve(__dirname, ".") },
+  },
+  server: {
+    hmr: process.env.DISABLE_HMR !== "true",
+    watch: process.env.DISABLE_HMR === "true" ? null : {},
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
+    },
+  },
+}));
+```
+
+---
+
+## 16. `package.json` (actualizado)
+
+```json
+{
+  "name": "munarq-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c cyan,magenta \"vite --port=3000 --host=0.0.0.0\" \"tsx watch server.ts\"",
+    "dev:web": "vite --port=3000 --host=0.0.0.0",
+    "dev:api": "tsx watch server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=esm --outfile=dist/server.js",
+    "start": "NODE_ENV=production node dist/server.js",
+    "preview": "vite preview",
+    "clean": "rm -rf dist server.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^8.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2"
+  }
+}
+```
+
+> **Acción requerida:** `npm install` para bajar `concurrently` (no estaba).
+
+---
+
+## 17. `metadata.json` (corregido)
+
+```json
+{
+  "name": "MUNΛRQ | Biocultural & Computational Architecture Studio",
+  "description": "Estudio de arquitectura eco-brutalista y biophilic que fusiona tectónica mineral, envolventes vegetales y diseño computacional. Paleta Concrete White #F5F5F5 + Moss Green #61752D, tipografía Cormorant / Montserrat / Inter / Space Mono.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+```
+
+---
+
+## 18. `.env.example` (documentado)
+
+```bash
+# GEMINI_API_KEY: Required for Gemini AI API calls.
+# If absent, /api/analyze degrades gracefully to a deterministic fallback.
+GEMINI_API_KEY="MY_GEMINI_API_KEY"
+
+# APP_URL: Public URL where the applet is hosted.
+APP_URL="MY_APP_URL"
+
+# PORT: Express API port. Vite dev proxies /api → :3001 automatically.
+PORT="3001"
+```
+
+---
+
+## Cómo verificarlo
+
+```bash
+npm install          # trae concurrently
+npm run dev          # → web en :3000, api en :3001, proxy /api funcionando
+```
+
+- Abre `http://localhost:3000` → navbar fija, dark mode persistido, hero, works, manifesto, lab, footer.
+- En el Research Lab mueve sliders: el SVG de deflexión y los stats se recalculan en vivo.
+- Pulsa **Analizar con Gemini**:
+  - Con `GEMINI_API_KEY` → párrafo editorial vía Gemini (`source: "gemini"`).
+  - Sin clave → análisis determinista local (`source: "fallback"`). El botón **nunca** falla.
+
+Build de producción:
+
+```bash
+npm run build        # vite build + esbuild → dist/server.js
+npm start            # NODE_ENV=production, sirve dist/ + /api en :3001
+```
+
+---
+
+## Lo que queda en el roadmap
+
+1. **Hero / Manifesto / Works están ya construidos en su versión "v1"**. La siguiente iteración natural es **Project Single Page** (`#project-casa-estrato`, etc.) — ya tienes `projects.ts` como fuente de datos y cada card apunta a su slug.
+2. **About / Practice & Team** — sección editorial con retratos en grayscale→color.
+3. **RFP Form** — formulario de contacto con validación, reutilizando tokens de UI.
+
+## Confirma y seguimos
+
+¿Doy el paso a **Project Single Page** en el siguiente turno, o prefieres que primero ajuste algo del shell (por ejemplo: tipografía de Hero, ratio del grid de Works, o que el Research Lab muestre una comparativa de materiales lado a lado)?
