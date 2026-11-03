@@ -7,12 +7,18 @@ export function SelectedWorks() {
       id="works"
       className="max-w-[1600px] mx-auto px-6 md:px-12 py-24 md:py-40"
     >
-      <header className="flex items-end justify-between border-b border-onyx/20 dark:border-concrete/20 pb-6 mb-16">
-        <h2 className="font-serif italic font-light text-5xl md:text-7xl text-onyx dark:text-concrete">
-          Selected works
-        </h2>
+      <header className="flex flex-col md:flex-row md:items-end justify-between border-b border-onyx/20 dark:border-concrete/20 pb-6 mb-16 gap-4">
+        <div>
+          <div className="w-12 h-1 bg-moss dark:bg-moss-bright mb-4" aria-hidden />
+          <span className="font-ui font-semibold text-[10px] tracking-editorial uppercase text-moss dark:text-moss-bright block mb-2">
+            02 — Selected Works
+          </span>
+          <h2 className="font-serif italic font-light text-5xl md:text-7xl text-onyx dark:text-concrete">
+            Selected works
+          </h2>
+        </div>
         <span className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
-          2022 — 2025
+          2022 — 2025 · Obras & Pabellones
         </span>
       </header>
 

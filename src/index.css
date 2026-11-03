@@ -3,29 +3,36 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Palette */
+  /* Palette — sin cambios, #E8E6DF ya está correcto */
   --color-concrete: #F5F5F5;
   --color-pure: #FFFFFF;
   --color-onyx: #1A1A1A;
-  --color-carbon: #666666;
+  --color-carbon: #555555;
   --color-dark-canvas: #121212;
   --color-dark-surface: #1A1A1A;
   --color-moss: #61752D;
   --color-moss-bright: #8ba83b;
   --color-greige: #E8E6DF;
 
-  /* Typography */
-  --font-serif: "Cormorant", Georgia, serif;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Montserrat", system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, monospace;
+  /* Typography — 4 fuentes, roles cerrados */
+  --font-serif: "Cormorant", Georgia, serif;   /* display editorial (títulos de proyecto) */
+  --font-sans: "Inter", system-ui, sans-serif; /* prosa (cuerpo, párrafos) */
+  --font-ui: "Barlow", system-ui, sans-serif;  /* UI + data sheets (labels, botones, tablas) */
+  --font-mono: "Space Mono", ui-monospace, monospace; /* SOLO cotas SVG, coords, refs */
+
+  /* Alias de retrocompatibilidad — los componentes con font-display siguen funcionando */
+  --font-display: "Barlow", system-ui, sans-serif;
 
   /* Force square corners */
   --radius-*: initial;
 }
 
 @layer base {
-  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-padding-top: 4rem;
+  }
 
   body {
     font-family: var(--font-sans);
@@ -47,6 +54,15 @@
     border-radius: 0 !important;
   }
 
+  /* Visible focus without rounding (architectural 1px outline) */
+  :focus-visible {
+    outline: 1px solid var(--color-moss);
+    outline-offset: 4px;
+  }
+  .dark :focus-visible {
+    outline-color: var(--color-moss-bright);
+  }
+
   /* Grayscale → color on hover, with soft zoom */
   img {
     display: block;
@@ -56,6 +72,16 @@
   .group:hover img, a:hover > img, figure:hover img {
     filter: grayscale(0);
     transform: scale(1.05);
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 

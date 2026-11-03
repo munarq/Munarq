@@ -1,4 +1,8 @@
-export function Footer() {
+export function Footer({
+  onOpenCommission,
+}: {
+  onOpenCommission?: () => void;
+}) {
   return (
     <footer
       id="contact"
@@ -12,12 +16,23 @@ export function Footer() {
           <p className="mt-6 font-serif italic font-light text-3xl md:text-4xl leading-tight text-onyx dark:text-concrete max-w-sm">
             Architecture that negotiates with the climate.
           </p>
-          <a
-            href="mailto:studio@munarq.mx"
-            className="mt-10 inline-block font-mono text-xs tracking-[0.2em] uppercase text-moss dark:text-moss-bright hover:underline underline-offset-4"
-          >
-            studio@munarq.mx →
-          </a>
+
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+            {onOpenCommission && (
+              <button
+                onClick={onOpenCommission}
+                className="px-6 py-3 bg-onyx text-concrete dark:bg-moss dark:text-concrete font-mono text-xs uppercase tracking-wider hover:bg-moss hover:text-white dark:hover:bg-moss/80 transition-colors cursor-pointer text-center"
+              >
+                Iniciar Encargo // RFP →
+              </button>
+            )}
+            <a
+              href="mailto:studio@munarq.mx"
+              className="inline-block font-mono text-xs tracking-[0.2em] uppercase text-moss dark:text-moss-bright hover:underline underline-offset-4"
+            >
+              studio@munarq.mx →
+            </a>
+          </div>
         </div>
 
         <div className="md:col-span-3">
@@ -37,7 +52,7 @@ export function Footer() {
             Aesthetic
           </p>
           <p className="font-sans text-sm leading-relaxed text-carbon dark:text-concrete/70 max-w-xs">
-            Concrete White · Onyx Black · Moss Green. Cormorant, Montserrat,
+            Concrete White · Onyx Black · Moss Green. Cormorant, Barlow,
             Inter, Space Mono. Square corners. No shadows. One-pixel lines.
           </p>
           <p className="mt-8 font-mono text-[10px] tracking-[0.2em] uppercase text-carbon dark:text-concrete/40">

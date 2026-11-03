@@ -4,17 +4,21 @@ import type { Theme } from "@/lib/useTheme";
 
 const LINKS = [
   { href: "#works",     label: "Works"     },
+  { href: "#practice",  label: "Practice"  },
   { href: "#manifesto", label: "Manifesto" },
   { href: "#lab",       label: "Research"  },
+  { href: "#resources", label: "Recursos"  },
   { href: "#contact",   label: "Contact"   },
 ];
 
 export function Navbar({
   theme,
   onToggleTheme,
+  onOpenCommission,
 }: {
   theme: Theme;
   onToggleTheme: () => void;
+  onOpenCommission?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -42,7 +46,7 @@ export function Navbar({
           MUNΛRQ
         </a>
 
-        <nav className="hidden md:flex items-center gap-10">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8">
           {LINKS.map((l) => (
             <a
               key={l.href}
@@ -52,9 +56,27 @@ export function Navbar({
               {l.label}
             </a>
           ))}
+          {onOpenCommission && (
+            <div className="pl-6 border-l border-onyx/15 dark:border-concrete/15 flex items-center">
+              <button
+                onClick={onOpenCommission}
+                className="font-display font-semibold text-[10px] tracking-editorial uppercase text-onyx dark:text-concrete hover:text-moss dark:hover:text-moss-bright transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                Encargo // RFP <span className="text-moss dark:text-moss-bright">→</span>
+              </button>
+            </div>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
+          {onOpenCommission && (
+            <button
+              onClick={onOpenCommission}
+              className="md:hidden px-2.5 py-1 border border-onyx/20 dark:border-concrete/20 bg-onyx text-concrete dark:bg-moss dark:text-concrete font-mono text-[9px] tracking-wider uppercase cursor-pointer"
+            >
+              RFP
+            </button>
+          )}
           <button
             onClick={onToggleTheme}
             aria-label="Toggle theme"
@@ -85,6 +107,17 @@ export function Navbar({
                 {l.label}
               </a>
             ))}
+            {onOpenCommission && (
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  onOpenCommission();
+                }}
+                className="mt-2 py-2.5 px-4 bg-onyx text-concrete dark:bg-moss dark:text-concrete font-mono text-xs tracking-widest uppercase text-center cursor-pointer"
+              >
+                Iniciar Encargo // RFP
+              </button>
+            )}
           </nav>
         </div>
       )}

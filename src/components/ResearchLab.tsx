@@ -1,16 +1,8 @@
 import { useMemo, useState } from "react";
 import { analyzeStructure } from "@/lib/api";
+import { MATERIALS, type MaterialKey, calculateStructuralDeflection } from "@/lib/structuralCalc";
 import { Reveal } from "./Reveal";
-import { Compass, Sparkles, MapPin } from "lucide-react";
-
-const MATERIALS = {
-  concrete: { label: "Hormigón visto", co2: 410, E: 30e9 },
-  steel:    { label: "Acero S355",     co2: 1850, E: 210e9 },
-  timber:   { label: "Madera CLT",     co2: 120, E: 12e9 },
-  stone:    { label: "Piedra local",   co2: 90,  E: 25e9 },
-} as const;
-
-type MaterialKey = keyof typeof MATERIALS;
+import { Compass } from "lucide-react";
 
 interface SiteZone {
   id: string;
@@ -81,18 +73,7 @@ export function ResearchLab() {
   const [activeSite, setActiveSite] = useState<SiteZone>(SITE_ZONES[0]);
 
   const calc = useMemo(() => {
-    const { E, co2: co2PerM3 } = MATERIALS[material];
-    const b = 0.3;
-    const h = span / 18;
-    const A = b * h;
-    const I = (b * h ** 3) / 12;
-    const q = load * 1000; // N/m (1m strip)
-    const L = span;
-    const delta = (5 * q * L ** 4) / (384 * E * I);
-    const deltaMm = delta * 1000;
-    const volume = A * L;
-    const co2 = volume * co2PerM3;
-    return { h, deltaMm, co2 };
+    return calculateStructuralDeflection(span, load, material);
   }, [span, load, material]);
 
   const norm = Math.min(calc.deltaMm / 30, 1);
@@ -133,12 +114,18 @@ export function ResearchLab() {
       id="lab"
       className="max-w-[1600px] mx-auto px-6 md:px-12 py-24 md:py-40"
     >
-      <header className="flex items-end justify-between border-b border-onyx/20 dark:border-concrete/20 pb-6 mb-12">
-        <h2 className="font-serif italic font-light text-5xl md:text-7xl text-onyx dark:text-concrete">
-          Research Lab
-        </h2>
+      <header className="flex flex-col md:flex-row md:items-end justify-between border-b border-onyx/20 dark:border-concrete/20 pb-6 mb-12 gap-4">
+        <div>
+          <div className="w-12 h-1 bg-moss dark:bg-moss-bright mb-4" aria-hidden />
+          <span className="font-ui font-semibold text-[10px] tracking-editorial uppercase text-moss dark:text-moss-bright block mb-2">
+            05 — Research Lab
+          </span>
+          <h2 className="font-serif italic font-light text-5xl md:text-7xl text-onyx dark:text-concrete">
+            Research Lab
+          </h2>
+        </div>
         <span className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
-          Structural calculator & site mapping v0.2
+          Cálculo Estructural & Mapeo de Biomas v0.2
         </span>
       </header>
 

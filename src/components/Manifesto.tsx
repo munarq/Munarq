@@ -9,7 +9,7 @@ export function Manifesto() {
       <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-24 md:py-40 grid md:grid-cols-12 gap-10">
         <div className="md:col-span-3">
           <p className="font-mono text-[10px] tracking-editorial uppercase text-carbon dark:text-concrete/60">
-            02 — Manifesto
+            04 — Manifesto
           </p>
         </div>
         <Reveal className="md:col-span-8 md:col-start-5">
